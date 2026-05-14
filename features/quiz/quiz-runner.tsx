@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { submitQuizAttempt } from "@/features/quiz/actions";
 import { buildQuizQuestions, scoreQuiz } from "@/features/quiz/engine";
 import { useLanguageStore } from "@/stores/language-store";
+import { useQuizStore } from "@/stores/quiz-store";
 import type { InterviewQuestion, QuestionCategory, QuizMode } from "@/types/interview";
 
 export function QuizRunner({
@@ -28,6 +29,7 @@ export function QuizRunner({
   const [answers, setAnswers] = useState<Record<string, number | null>>({});
   const [isFinished, setIsFinished] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const setLastScore = useQuizStore((state) => state.setLastScore);
 
   const current = quiz[index];
   const completion = quiz.length ? ((index + Number(isFinished)) / quiz.length) * 100 : 0;
@@ -45,6 +47,7 @@ export function QuizRunner({
     }
 
     setIsFinished(true);
+    setLastScore(scoreQuiz(quiz.map((item) => ({ selectedIndex: nextAnswers[item.questionId] ?? null, correctIndex: item.correctIndex }))).percent);
     startTransition(async () => {
       await submitQuizAttempt({
         mode,
