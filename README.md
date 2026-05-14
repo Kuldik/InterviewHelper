@@ -81,9 +81,10 @@ npm run typecheck
 2. In [Vercel](https://vercel.com): **Add New Project** → import the repo. Under **Build & Development Settings**, leave **Build Command** empty so Vercel uses `npm run build` from `package.json` (must include `prisma migrate deploy && next build`).
 3. **Environment variables** (Project → Settings → Environment Variables):
    - `DATABASE_URL` — for production use a hosted DB Vercel can reach. **SQLite on the default serverless filesystem is not suitable** for persistent writes (each invocation can see an ephemeral or read-only FS). Use [Prisma Postgres](https://www.prisma.io/), Neon, Supabase, Turso (`libsql` + Prisma adapter), or another Postgres URL.
-4. **Build**: `npm run build` runs `prisma migrate deploy && next build`. Ensure `DATABASE_URL` is set for **Production** and **Preview**.
-5. **Neon**: if migrations fail with the **pooler** URL, use Neon’s **direct / non-pooled** connection string for `DATABASE_URL` on Vercel, or add `directUrl` in Prisma per [Neon docs](https://neon.tech/docs/guides/prisma).
-6. **Seed** (once per DB): locally or via a one-off command with prod `DATABASE_URL`: `npx prisma db seed`.
+4. В логе деплоя проверь **Source / Commit**: хэш должен совпадать с последним коммитом на **`main`** в твоём репозитории. Если Vercel тянет старый коммит — **Redeploy** и при необходимости **Clear build cache**; проверь, что проект привязан к нужному репо и ветке.
+5. **Build Command** в Vercel Dashboard лучше **очистить** (пусто). Жёсткая цепочка сборки задана в **`vercel.json`**: `prisma migrate deploy && next build`.
+6. **Neon**: if migrations fail with the **pooler** URL, use Neon’s **direct / non-pooled** connection string for `DATABASE_URL` on Vercel, or add `directUrl` in Prisma per [Neon docs](https://neon.tech/docs/guides/prisma).
+7. **Seed** (once per DB): locally or via a one-off command with prod `DATABASE_URL`: `npx prisma db seed`.
 
 **Interface language** is stored in a cookie `ih-lang` (`en` | `ru`); the header switcher refreshes the page so server-rendered UI matches.
 
