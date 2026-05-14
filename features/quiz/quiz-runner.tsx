@@ -7,9 +7,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { useLanguage } from "@/components/providers/language-context";
 import { submitQuizAttempt } from "@/features/quiz/actions";
 import { buildQuizQuestions, scoreQuiz } from "@/features/quiz/engine";
-import { useLanguageStore } from "@/stores/language-store";
+import { useUi } from "@/lib/i18n/use-ui";
 import { useQuizStore } from "@/stores/quiz-store";
 import type { InterviewQuestion, QuestionCategory, QuizMode } from "@/types/interview";
 
@@ -22,7 +23,8 @@ export function QuizRunner({
   mode: QuizMode;
   category?: QuestionCategory;
 }) {
-  const language = useLanguageStore((state) => state.language);
+  const { language } = useLanguage();
+  const u = useUi();
   const quiz = useMemo(() => buildQuizQuestions(questions, language, 10), [questions, language]);
   const [startedAt] = useState(() => Date.now());
   const [index, setIndex] = useState(0);
@@ -60,7 +62,7 @@ export function QuizRunner({
           correctIndex: item.correctIndex
         }))
       });
-      toast.success("Quiz saved");
+      toast.success(u.quizRunner.toastSaved);
     });
   }
 
@@ -68,9 +70,9 @@ export function QuizRunner({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>No questions yet</CardTitle>
+          <CardTitle>{u.quizRunner.noQuestions}</CardTitle>
         </CardHeader>
-        <CardContent className="text-muted-foreground">Seed the database or pick another mode.</CardContent>
+        <CardContent className="text-muted-foreground">{u.quizRunner.noQuestionsHint}</CardContent>
       </Card>
     );
   }
@@ -80,13 +82,13 @@ export function QuizRunner({
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Session complete</CardTitle>
+            <CardTitle>{u.quizRunner.sessionComplete}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-4">
-            <Metric label="Score" value={`${scored.percent}%`} />
-            <Metric label="Correct" value={`${scored.correct}/${scored.total}`} />
-            <Metric label="Skipped" value={String(scored.skipped)} />
-            <Metric label="Saved" value={isPending ? "Saving" : "Done"} />
+            <Metric label={u.quizRunner.score} value={`${scored.percent}%`} />
+            <Metric label={u.quizRunner.correct} value={`${scored.correct}/${scored.total}`} />
+            <Metric label={u.quizRunner.skipped} value={String(scored.skipped)} />
+            <Metric label={u.quizRunner.saveStatus} value={isPending ? u.quizRunner.saving : u.quizRunner.done} />
           </CardContent>
         </Card>
         <div className="grid gap-3">
@@ -98,7 +100,7 @@ export function QuizRunner({
                 <CardContent className="p-4">
                   <p className="font-medium">{item.prompt[language]}</p>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    Correct: {item.variants[item.correctIndex]?.[language]}
+                    {u.quizRunner.correctLabel} {item.variants[item.correctIndex]?.[language]}
                   </p>
                 </CardContent>
               </Card>
@@ -120,7 +122,7 @@ export function QuizRunner({
       <div className="space-y-2">
         <div className="flex justify-between text-sm text-muted-foreground">
           <span>
-            Question {index + 1} of {quiz.length}
+            {u.quizRunner.questionProgress(index + 1, quiz.length)}
           </span>
           <span>{Math.round(completion)}%</span>
         </div>
@@ -132,12 +134,17 @@ export function QuizRunner({
         </CardHeader>
         <CardContent className="grid gap-3">
           {current.variants.map((variant, variantIndex) => (
-            <Button key={variant[language]} className="h-auto justify-start whitespace-normal p-4 text-left" variant="outline" onClick={() => answer(variantIndex)}>
+            <Button
+              key={`${current.questionId}-${variantIndex}`}
+              className="h-auto justify-start whitespace-normal p-4 text-left"
+              variant="outline"
+              onClick={() => answer(variantIndex)}
+            >
               {variant[language]}
             </Button>
           ))}
           <Button variant="ghost" onClick={() => answer(null)}>
-            Skip
+            {u.quizRunner.skip}
           </Button>
         </CardContent>
       </Card>

@@ -6,8 +6,26 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { setQuestionProgress, toggleFavorite } from "@/features/progress/actions";
+import { useUi } from "@/lib/i18n/use-ui";
 import { useProgressStore } from "@/stores/progress-store";
 import type { ProgressState } from "@/types/interview";
+
+function labelForState(state: ProgressState, u: ReturnType<typeof useUi>) {
+  switch (state) {
+    case "known":
+      return u.actions.known;
+    case "unknown":
+      return u.actions.needPractice;
+    case "failed":
+      return u.actions.failed;
+    case "skipped":
+      return u.actions.skipped;
+    case "new":
+      return u.actions.newLabel;
+    default:
+      return state;
+  }
+}
 
 export function QuestionActions({
   questionId,
@@ -18,6 +36,7 @@ export function QuestionActions({
   progressState: ProgressState;
   isFavorite: boolean;
 }) {
+  const u = useUi();
   const [isPending, startTransition] = useTransition();
   const setOptimisticProgress = useProgressStore((state) => state.setProgress);
   const setOptimisticFavorite = useProgressStore((state) => state.setFavorite);
@@ -28,7 +47,7 @@ export function QuestionActions({
     setOptimisticProgress(questionId, state);
     startTransition(async () => {
       await setQuestionProgress(questionId, state);
-      toast.success(`Marked as ${state}`);
+      toast.success(u.actions.toastMarked(labelForState(state, u)));
     });
   }
 
@@ -36,7 +55,7 @@ export function QuestionActions({
     setOptimisticFavorite(questionId, !currentFavorite);
     startTransition(async () => {
       await toggleFavorite(questionId);
-      toast.success(currentFavorite ? "Removed from saved" : "Saved question");
+      toast.success(currentFavorite ? u.actions.toastRemoved : u.actions.toastSaved);
     });
   }
 
@@ -44,19 +63,19 @@ export function QuestionActions({
     <div className="flex flex-wrap gap-2">
       <Button disabled={isPending} onClick={() => mark("known")} variant={progressState === "known" ? "default" : "outline"}>
         <CheckCircle2 className="h-4 w-4" />
-        Known
+        {u.actions.known}
       </Button>
       <Button disabled={isPending} onClick={() => mark("unknown")} variant="outline">
         <HelpCircle className="h-4 w-4" />
-        Need practice
+        {u.actions.needPractice}
       </Button>
       <Button disabled={isPending} onClick={() => mark("failed")} variant="outline">
         <XCircle className="h-4 w-4" />
-        Failed
+        {u.actions.failed}
       </Button>
       <Button disabled={isPending} onClick={favorite} variant={currentFavorite ? "default" : "outline"}>
         <Star className={currentFavorite ? "h-4 w-4 fill-current" : "h-4 w-4"} />
-        {currentFavorite ? "Saved" : "Save"}
+        {currentFavorite ? u.actions.saved : u.actions.save}
       </Button>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useLanguageStore } from "@/stores/language-store";
+import { useLanguage } from "@/components/providers/language-context";
 import type { Language } from "@/types/interview";
 
 const options: { value: Language; label: string }[] = [
@@ -10,8 +10,7 @@ const options: { value: Language; label: string }[] = [
 ];
 
 export function LanguageSwitcher() {
-  const language = useLanguageStore((state) => state.language);
-  const setLanguage = useLanguageStore((state) => state.setLanguage);
+  const { language, setLanguage } = useLanguage();
 
   return (
     <div className="inline-flex rounded-xl border p-1">

@@ -1,3 +1,4 @@
+import { defaultMistakesEn, defaultMistakesRu } from "./default-mistakes";
 import { supplementalQuestions } from "./supplement";
 import type { InterviewQuestion, QuestionCategory, QuestionDifficulty } from "../../types/interview";
 
@@ -35,18 +36,6 @@ const expectationEn = [
   "Mention one limitation or common mistake."
 ];
 
-const defaultMistakesRu = [
-  "Отвечать слишком академично и терять главный смысл.",
-  "Не связывать концепт с реальным кодом.",
-  "Игнорировать ограничения и trade-offs."
-];
-
-const defaultMistakesEn = [
-  "Answering too academically and missing the core point.",
-  "Not connecting the concept to real code.",
-  "Ignoring limitations and trade-offs."
-];
-
 function q(entry: SeedEntry): InterviewQuestion {
   return {
     id: entry.id,
@@ -61,8 +50,8 @@ function q(entry: SeedEntry): InterviewQuestion {
     followUpAnswer: { ru: entry.followAnswerRu, en: entry.followAnswerEn },
     interviewerExpectation: { ru: expectationRu, en: expectationEn },
     commonMistakes: {
-      ru: entry.mistakesRu ?? defaultMistakesRu,
-      en: entry.mistakesEn ?? defaultMistakesEn
+      ru: entry.mistakesRu ?? [...defaultMistakesRu],
+      en: entry.mistakesEn ?? [...defaultMistakesEn]
     },
     keywords: entry.keywords,
     relatedQuestions: entry.relatedQuestions ?? []
