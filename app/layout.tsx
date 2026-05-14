@@ -10,6 +10,9 @@ import { LANG_COOKIE } from "@/lib/i18n/lang-cookie";
 import type { Language } from "@/types/interview";
 import "./globals.css";
 
+/** Avoid DB + cookie reads during `next build` static prerender on Vercel (Neon cold / pooler). */
+export const dynamic = "force-dynamic";
+
 const inter = Inter({
   subsets: ["latin", "cyrillic"],
   variable: "--font-inter"

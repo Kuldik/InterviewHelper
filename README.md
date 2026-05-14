@@ -78,7 +78,7 @@ npm run typecheck
 ## Deployment (Vercel)
 
 1. Push the repo to GitHub/GitLab/Bitbucket.
-2. In [Vercel](https://vercel.com): **Add New Project** → import the repo.
+2. In [Vercel](https://vercel.com): **Add New Project** → import the repo. Under **Build & Development Settings**, leave **Build Command** empty so Vercel uses `npm run build` from `package.json` (must include `prisma migrate deploy && next build`).
 3. **Environment variables** (Project → Settings → Environment Variables):
    - `DATABASE_URL` — for production use a hosted DB Vercel can reach. **SQLite on the default serverless filesystem is not suitable** for persistent writes (each invocation can see an ephemeral or read-only FS). Use [Prisma Postgres](https://www.prisma.io/), Neon, Supabase, Turso (`libsql` + Prisma adapter), or another Postgres URL.
 4. **Build**: `npm run build` runs `prisma migrate deploy && next build`. Ensure `DATABASE_URL` is set for **Production** and **Preview**.
