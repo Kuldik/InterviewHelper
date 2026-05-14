@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Question {
+  id                     String             @id
+  category               String
+  difficulty             String
+  tags                   Json
+  frequencyScore         Int
+  question               Json
+  shortAnswer            Json
+  detailedAnswer         Json
+  followUpQuestion       Json
+  followUpAnswer         Json
+  interviewerExpectation Json
+  commonMistakes         Json
+  keywords               Json
+  relatedQuestions       Json
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  progress               QuestionProgress?
+  favorite               FavoriteQuestion?
+  quizAnswers            QuizAnswer[]
+
+  @@index([category])
+  @@index([difficulty])
+  @@index([frequencyScore])
+}
+
+model QuestionProgress {
+  id              String    @id @default(cuid())
+  questionId      String    @unique
+  state           String    @default("new")
+  knownCount      Int       @default(0)
+  unknownCount    Int       @default(0)
+  skippedCount    Int       @default(0)
+  failedCount     Int       @default(0)
+  practicedCount  Int       @default(0)
+  lastPracticedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  question        Question  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([state])
+  @@index([lastPracticedAt])
+}
+
+model FavoriteQuestion {
+  id         String   @id @default(cuid())
+  questionId String   @unique
+  createdAt  DateTime @default(now())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model QuizAttempt {
+  id             String       @id @default(cuid())
+  mode           String
+  category       String?
+  language       String
+  totalQuestions Int
+  correctCount   Int
+  skippedCount   Int
+  durationMs     Int
+  completedAt    DateTime     @default(now())
+  answers        QuizAnswer[]
+
+  @@index([mode])
+  @@index([completedAt])
+}
+
+model QuizAnswer {
+  id             String      @id @default(cuid())
+  attemptId      String
+  questionId     String
+  selectedIndex  Int?
+  correctIndex   Int
+  isCorrect      Boolean
+  isSkipped      Boolean     @default(false)
+  answeredAt     DateTime    @default(now())
+  attempt        QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question       Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+  @@index([isCorrect])
+}
+
+model StreakDay {
+  id             String   @id @default(cuid())
+  date           String   @unique
+  practicedCount Int      @default(0)
+  completedQuiz  Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
